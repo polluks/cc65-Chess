@@ -1,5 +1,13 @@
+0.   Updates
 
-I.   Introduction
+* May 2020 - Advanced Build instructions at XI.
+* May 2020 - I created a version for the Commander X16 (R37).
+* May 2020 - I created a graphics version for the C64.
+* May 2020 - [raxiss] created a nice Oric-1/Atmos/Telestrat port.
+* Jan 2020 - Oliver Schmidt created a beautiful Apple II port. See IX below.
+* There are images for all platforms in the releases tab.
+
+I.   Introduction (Feb 14, 2014)
 
 I started playing chess about 3 months ago and this got me wondering how
 difficult it would be to make a computer chess game.  I decided to try and
@@ -23,7 +31,7 @@ The colors here refer to the C64 version.  The terminal version has a minimal
 working display but does try to somewhat match the colors of the C64.
 
 The user controls an on-screen cursor.  The cursor changes color to indicate
-a state.  The colors for selection are: 
+a state.  The colors for selection are:
   Green - the piece can be selected
   Red - The piece cannot be selected as it doesn't have valid moves
   Purple - Empty tile or piece on the other side
@@ -42,11 +50,16 @@ and down cursor keys to change the selection.
 While a side is under human control, there are a few more options.  Press B to
 toggle on/off a state showing on every tile how many of both black and white's
 pieces can attack that tile.  Pressing A will toggle a highlight of all of the
-pieces on the opposing side that attack the selected tile.  Pressing D will 
+pieces on the opposing side that attack the selected tile.  Pressing D will
 toggle a highlight of all the pieces on the side currently playing's side that
-can defend the selected tile.  All three of these options basically give a 
+can defend the selected tile.  All three of these options basically give a
 visual representation of the Attack DB.  The colors are: For attackers Cyan
 and for defenders Red.
+
+Lastly, the game has an Undo/Redo stack that tracks the last 254 moves. Pressing
+U will undo the last move and R will redo the last move.  In an AI/Human game,
+the undo will undo the last AI and human player move, so the human player can
+make a different move.
 
 
 III.  Distribution
@@ -185,5 +198,133 @@ Feel free to send me an email if you have any comments.  If you do make a port
 or something else, I would love to hear about it!
 
 swessels@email.com
-
+Feb 14, 2014
 Thank you!
+
+
+IX.    Apple II Specific Version Information
+
+General display uses the Apple II hires mode accessed via custom asm
+functions.
+
+Menu display uses the 4 line bottom text option of the Apple II hires mode via
+cc65 CONIO functions.
+
+All hires access is byte aligned, therefore the horizontal resolution is 40
+(bytes).
+
+Hires access is done via simple (binary) ROPs (raster operations) by using
+actual 6502 (immediate) opcodes.
+
+The C64 and Curses implementation both make heavy use of colors while Apple II
+implementation mustn't depend on (but may benefit from) colors. Therefore the
+user-operated cursor inverts the border of the current field. It's hard to find
+a compromise between making the cursor visible well and showing the piece
+"under" the cursor well. Additionally it is desirable to show different cursor
+states (empty, invalid, valid). The approach chosen is to have different
+thicknesses of the inverted border:
+
+Valid: Thin
+Invalid: Medium
+Empty: Thick
+
+When it comes to showing attackers/defenders (via the keys A / D) there's no
+alternative to resorting to colors:
+
+Attackers: Red
+Defenders: Green
+
+So the only field display variant left is the piece selected for moving. Instead
+of introducing a third type of highlighting (beside border inversion and
+coloring) it is simply colored Magenta. The reasoning:
+
+On a monochrome display the user won't have much fun showing attackers/defenders
+anyway. And without showing those the selected piece is the only colored (aka
+striped) piece making it clearly visible.
+
+On a color display a third color (beside attackers/defenders) works just fine.
+
+As the Apple II doesn't have cursor-up and cursor-down keys the keys O and L
+work as alternatives to the those cursor keys.
+
+There's a video showing the Apple II version here: https://youtu.be/PPy-cg4ghDY
+
+Oliver Schmidt
+Jan 19, 2020
+
+
+XI.    Build Instructions
+
+All of the 8-Bit versions of cc65 Chess can be built using make.  
+
+I recommend the game be built for speed, which also results in smaller file and
+is essential for all targets.  This is done by using the OPTIONS=optspeed
+command line to make.  See examples below.
+
+When you type make (using GNU Make) the default behaviour is to make all of the
+versions. Currently, that means the following (cc65 target name in brackets):
+
+* Commodore 64 HiRes (c64)
+* Commodore 64 Multicolor Text (c64.chr)
+* Apple 2 (apple2)
+* Oric-1/Atmos/Telestrat (atmos)
+* Commander X16 (cx16)
+
+Most platforms have an additional step that can be performed, which is to make a
+program (prg), disk (dsk) or tape (tap) file.  Do make again, but with dsk
+(Apple 2 dsk), tap (Oric tape), prg (C64 prg), cprg (c64.chr prg) or cxprg (cX16
+prg) on the command line.
+
+The two steps can be combined into a single make command, by using "all" as the
+first target, i.e: 
+make OPTIONS=optspeed all dsk tap prg cprg cxprg
+
+Makeing a terminal version (using curses) - See IV (b) above.
+
+Examples:
+1) Make everything, and then make the dsk and tap files for the Apple and Oric.
+
+make OPTIONS=optspeed
+
+This will make the following files:
+cc65-Chess.apple2
+cc65-Chess.atmos
+cc65-Chess.c64
+cc65-Chess.c64.chr
+cc65-Chess.cx16
+
+make dsk tap prg cprg cxprg
+
+This will make the following files:
+cc65-Chess.tap
+cc65-Chess.dsk
+cc65-Chess-c64.prg
+cc65-Chess-chr.prg
+cc65-Chess-cx16.prg
+
+Once you have used the OPTIONS=optspeed on the command-line, you do not have to
+use it again since the options are saved in a file called Makefile.options.
+
+2) Build just one version (let's say the Oric)
+
+make OPTIONS=optspeed TARGETS=atmos tap
+This will create a ready to run TAP file named cc65-Chess.tap
+
+3) You can also start an emulator directly from make with the test command-line.
+
+make OPTIONS=optspeed atmos test
+
+This last command example is a good way of callimg make to build and test any of
+the targets by itself, provided you have configured an emulator in the Makefile.
+In this case, it will call the emulator with cc65-Chess.atmos but Oricutron
+doesn't mind that the exytension isn't .tap.
+
+Look for _EMUCMD in the Makefile.  You may have to specify a full path to the
+emulator, and in some cases you may need to change the test: command itself. For
+example, to run AppleWin I removed the $< from $(EMUCMD) $< in the test:
+section, because AppleWin did not like the extra (cc64-Chess.apple2) file being
+passed, and I had to give it the full path to cc64-Chess.dsk as part of apple2_EMUCMD.
+
+Lastly - the CX16 and C64 versions use the same piece defenitions that Oliver
+Schmidt added for the Apple II, and kindly agreed to let me use for these
+versions as well.  See genPieces.cpp in the specific src folder for more details.

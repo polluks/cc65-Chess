@@ -242,12 +242,12 @@ void plat_ShowSideToGoLabel(char side)
 }
 
 /*-----------------------------------------------------------------------*/
-void plat_Highlight(char position, char color)
+void plat_Highlight(char position, char color, char cursor)
 {
 	char y = (BOARD_PIECE_HEIGHT/2)+1+BOARD_PIECE_HEIGHT*((position / 8)), x = (BOARD_PIECE_WIDTH/2)+BOARD_PIECE_WIDTH*((position & 7));
 	move(y,x);
 	color_set(color,0);
-	printw("*");
+	printw(cursor?"*":"!");
 }
 
 /*-----------------------------------------------------------------------*/
@@ -267,7 +267,7 @@ void plat_ClearMessage()
 }
 
 /*-----------------------------------------------------------------------*/
-// This function can/will gange the gTile and related global variables so
+// This function can/will change the gTile and related global variables so
 // caution is needed
 void plat_AddToLogWin()
 {

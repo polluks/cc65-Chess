@@ -1,5 +1,5 @@
 /*
- *	plat64.c
+ *	platC64CHR.c
  *	cc65 Chess
  *
  *	Created by Stefan Wessels, February 2014.
@@ -14,7 +14,7 @@
 #include "../undo.h"
 #include "../frontend.h"
 #include "../plat.h"
-#include "data.h"
+#include "dataC64CHR.h"
 
 /*-----------------------------------------------------------------------*/
 // System locations
@@ -362,7 +362,7 @@ void plat_ShowSideToGoLabel(char side)
 }
 
 /*-----------------------------------------------------------------------*/
-void plat_Highlight(char position, char color)
+void plat_Highlight(char position, char color, char)
 {
 	char y = position / 8, x = position & 7;
 	
